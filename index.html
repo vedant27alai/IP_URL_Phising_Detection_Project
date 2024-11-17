@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fraud and IP Detection</title>
+</head>
+<body>
+    <h1>Fraud and IP Detection</h1>
+    
+    <!-- URL Prediction Form -->
+    <h2>URL Prediction</h2>
+    <form id="urlForm">
+        <label for="url">Enter URL:</label>
+        <input type="text" id="url" name="url" required>
+        <button type="submit">Check URL</button>
+    </form>
+    <div id="urlResult">
+        <h3>URL Result:</h3>
+        <p id="urlResultText"></p>
+    </div>
+    
+    <!-- IP Address Prediction Form -->
+    <h2>IP Address Prediction</h2>
+    <form id="ipForm">
+        <label for="ipAddress">Enter IP Address:</label>
+        <input type="text" id="ipAddress" name="ipAddress" required>
+        <button type="submit">Check IP Address</button>
+    </form>
+    <div id="ipResult">
+        <h3>IP Address Result:</h3>
+        <p id="ipResultText"></p>
+    </div>
+    
+    <!-- JavaScript to handle form submissions -->
+    <script>
+        // URL Prediction
+        document.getElementById('urlForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const url = document.getElementById('url').value;
+            
+            // Using the complete URL in the fetch function
+            fetch('http://localhost:5000/predict_fraud', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                // Sending the URL as JSON data
+                body: JSON.stringify({ url: url })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    document.getElementById('urlResultText').innerText = `Error: ${data.error}`;
+                } else {
+                    // Display 'safe' or 'unsafe' based on the prediction
+                    document.getElementById('urlResultText').innerText = `URL is ${data.prediction === 'safe' ? 'safe' : 'unsafe'}`;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('urlResultText').innerText = 'An error occurred. Please try again.';
+            });
+        });
+
+        // IP Address Prediction
+document.getElementById('ipForm').addEventListener('submit', function(event) {
+    event.preventDefault();
+    const ipAddress = document.getElementById('ipAddress').value;
+
+    // Log before sending the fetch request
+    console.log("Sending IP request:", ipAddress);
+    
+    fetch('http://localhost:5000/predict_ip', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ ipAddress: ipAddress })
+    })
+    .then(response => {
+        // Log the raw response to inspect its status and content
+        console.log("Received response:", response);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log("Parsed data:", data); // Log the data
+        if (data.error) {
+            document.getElementById('ipResultText').innerText = `Error: ${data.error}`;
+        } else {
+            document.getElementById('ipResultText').innerText = `IP Address is ${data.prediction === 'safe' ? 'safe' : 'unsafe'}`;
+        }
+    })
+    .catch(error => {
+        console.error('Fetch error:', error); // Log the error
+        document.getElementById('ipResultText').innerText = 'An error occurred. Please try again.';
+    });
+});
+ 
+    </script> 
+</body>
+</html>
